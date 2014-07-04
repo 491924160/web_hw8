@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+#result1{
+margin-left:5px;
+width:100px;
+padding:0px;
+}
+#result2
+{
+margin-right:5px;
+width:150px;
+padding:0px;
+}
+.head_left
+{
+margin:auto;
+float:left;
+width:500px;
+}
+.head_right
+{
+margin-right:50px;
+float:left;
+width:200px;
+}
+.red
+{
+color:red;
+}
+.green
+{
+color:green;
+}
+.symbol
+{
+color:white;
+font-size: 30px;
+margin-bottom:0;
+font-family:Times New Roman;
+}
+.symbol1
+{
+font-size:30px;
+display:inline;
+margin-top:0;
+font-family:Times New Roman;
+color:white;
+}
+.symbol2{
+font-size:25px;
+display:inline;
+margin-top:0;
+}
+</style>
+<meta charset="UTF-8">
+<title>HW8</title>
+<script
+src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js">
+</script>
+<script src="http://yui.yahooapis.com/3.15.0/build/yui/yui-min.js"></script>
+<script src="display.js"></script>
+
+</head>
+<body class="yui3-skin-sam" background='stock.jpg' style='background-size:100%' >
+<div id="fb-root"></div>
+    <script>
+      window.fbAsyncInit = function() {
+        FB.init({
+          appId      : '721431701212261',
+          status     : false,
+          xfbml      : true
+        });
+      };
+
+      (function(d, s, id){
+         var js, fjs = d.getElementsByTagName(s)[0];
+         if (d.getElementById(id)) {return;}
+         js = d.createElement(s); js.id = id;
+         js.src = "//connect.facebook.net/en_US/all.js";
+         fjs.parentNode.insertBefore(js, fjs);
+       }(document, 'script', 'facebook-jssdk'));
+    </script>
+
+    
+<div style="margin:auto;width:800px">
+<div style="margin-left:0px;margin-top:20px;margin-bottom:30px;">
+<form id="searchbox">
+<p style='color:white;display: inline; font-size: 24px; font-family: "Times New Roman", Serif; font-style: normal; position: relative;margin-bottom:40px'>Company: </p>
+<input type="text" id="com" style="height:25px; width: 410px;">&nbsp;&nbsp;
+<input type="button" value="search" id="bt1" style="width: 84px; height: 30px; ">
+</form>
+</div>
+<div style="border:0px;display:block;height:200px" id="hello">
+<div class="head_left">
+<p class="symbol"></p>
+<p class="symbol1"></P>
+<p class="symbol2"></p><br>
+</div>
+<div class="head_right"></div>
+</div><br><br>
+<hr style="visibility:hidden;margin-left:10px;background-color:white;margin-bottom:35px;height:2px">
+<button id="bt2" style="padding:0px;margin:0px;border:0px;visibility:hidden; background-color: transparent;" onClick="post()" ><img id="face" SRC='facebook.png' style="height:30px"/></button>
+<div class="yui3-skin-sam"  id="result" style="visibility:hidden" align="left">
+    <ul>
+        <li ><a href="#Quote">Quote Information</a></li>
+        <li ><a href="#News">News Headlines</a></li>
+       
+    </ul>
+    <div>
+        <div id="Quote">
+        <table id="table1" style="width:750px">
+        
+        </table>
+        </div>
+        <div id="News"><table id="table2"></table></div>
+    </div>
+</div>
+</div>
+
+
+</body>
+</html>

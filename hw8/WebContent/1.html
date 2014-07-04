@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="http://yui.yahooapis.com/3.15.0/build/yui/yui-min.js"></script>
+<script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+	<script type="text/javascript">
+	var fuckyou;
+	var YAHOO = {
+		        Finance: {
+		            SymbolSuggest: {}
+		        }
+		    };
+			
+	$(document).ready(function(){
+	$(document).ajaxError(function()
+	{
+	$("h2").remove();
+	$("#level_1").css("visibility","hidden");
+	$("#level_2").css("visibility","hidden");
+	$("#level_0").after("<h2 align='center'>Stock Information not available!</h2>")
+	});
+		$("#formtext").keyup(function()
+				{
+				var symbol=$("#formtext").val();
+				$.ajax(
+				{
+				type:"GET",
+				url:"http://autoc.finance.yahoo.com/autoc",
+				data:
+				{
+				query:symbol
+				},
+				jsonp:"callback",
+				dataType:"jsonp",
+				jsonpCallback:"YAHOO.Finance.SymbolSuggest.ssCallback"
+				});
+				YAHOO.Finance.SymbolSuggest.ssCallback=function (data)
+		{
+			YUI().use('autocomplete', 'autocomplete-highlighters', function (Y) {
+				var inputnode=Y.one('#formtext');
+				var result=data.ResultSet.Result;
+				var test=[];
+				$.each(result,function(index,value)
+						{
+					var str=value.symbol+", "+value.name+" ("+value.exch+")";
+						test.push(str);
+						});
+				inputnode.plug(Y.Plugin.AutoComplete,
+				{
+					allowBrowserAutocomplete:false,
+					activateFirstItem:true	
+					 }			
+				);
+
+				inputnode.ac.set('source',test);			
+			});
+		};
+				});
+				
+	});
+	
+	function post(test)
+	{
+		var link1=test.result.StockChartImageURL;
+		FB.ui(
+		    	{
+		    		method: 'feed',
+	name: test.result.Name,
+	link:"http://finance.yahoo.com/q;_ylt=AjYxKpIh6L.aoN385saI6wup_8MF;_ylc=X1MDMjE0MjQ3ODk0OARfcgMyBGZyA3VoM19maW5hbmNlX3dlYl9ncwRmcjIDc2EtZ3AEZ3ByaWQDBG5fZ3BzAzEwBG9yaWdpbgNmaW5hbmNlLnlhaG9vLmNvbQRwb3MDMQRwcXN0cgMEcXVlcnkDQUEsBHNhYwMxBHNhbwMx?p=http%3A%2F%2Ffinance.yahoo.com%2Fq%3Fs%3DAA%26ql%3D0&type=2button&fr=uh3_finance_web_gs&uhb=uhb2&s="+test.result.Symbol,
+	picture: link1,
+	caption: "Stock Information of "+test.result.Name+"("+test.result.Symbol+")",
+	description: "Last Trade Price:"+test.result.Quote.LastTradePriceOnly+", Change:"+test.result.Quote.ChangeType+test.result.Quote.Change+"("+test.result.Quote.ChangeinPercent+")"
+		    	},function(response){
+		    		if(response&&response.post_id)
+		    		alert("post accomplished");
+		    		else
+		    			alert("failure");
+		    	}	);
+	}
+	function getinfo()
+	{
+		if ($("#formtext").val()==""||$("#formtext").val()==null) 
+		{
+			alert("Please enter company name/symbol")
+		}
+		else
+			{
+			getjson();
+			}
+	}
+	function getjson()
+	{
+		$.get("http://cs-server.usc.edu:38054/examples/servlet/finance?symbol="+$("#formtext").val().split(",",1),function(data,status)
+			
+			{	
+			fuckyou=eval("(" +data+ ")");
+				data=fuckyou;
+				//response=eval("(" +data+ ")");
+				$("h2").remove();
+				$("#level_1").css("visibility","visible");
+				//alert(data.result.Symbol);
+				$("img").remove();
+				$(".company_info").html(data.result.Name+"("+data.result.Symbol+")");
+				$(".quote").html(data.result.Quote.LastTradePriceOnly);
+				$(".change").html(function()
+				{
+					if (data.result.Quote.ChangeType=="-") 
+						{
+							$(".change").html("<img src='down_r.gif' style='height:30px;width:20px;color:red;display:inline'/>"+data.result.Quote.Change+"("+data.result.Quote.ChangeInPercent+")<br>")
+							.css("color","red");
+						}
+					else if (data.result.Quote.ChangeType=="+") 
+						{
+							$(".change").html("<img src='up_g.gif' style='height:30px;width:20px;color:green;display:inline'/>"+data.result.Quote.Change+"("+data.result.Quote.ChangeInPercent+")<br>")
+							.css("color","green");
+						}
+						else
+					{
+						$(".change").html(data.result.Change+"("+data.result.ChangeinPercent+")")
+					}
+				});
+			$(".facebook").css("visibility","visible");	
+			$(".right").html("<img src="+data.result.StockChartImageURL+"/>");
+			$(".right").css("visibility","visible");
+			$(".left").append("<img src='facebook.jpg' height='30px' width='60px' id='face'>");
+
+			$("#level_2").css("visibility","visible");
+
+			$("#Pre_Close").html(data.result.Quote.PreviousClose);
+			$("#Day_Range").html(data.result.Quote.DaysLow+" - "+data.result.Quote.DaysHigh);
+			$("#Open").html(data.result.Quote.Open);
+			$("#52wk_Range").html(data.result.Quote.YearLow+" - "+data.result.Quote.YearHigh);
+			$("#Bid").html(data.result.Quote.Bid);
+			$("#Volume").html(data.result.Quote.Volume);
+			$("#Ask").html(data.result.Quote.Ask);
+			$("#Avg_Vol").html(data.result.Quote.AverageDailyVolume);
+			$("#1y").html(data.result.Quote.OneyrTargetPrice);
+			$("#Market_Cap").html(data.result.Quote.MarketCapitalization);
+			$("#level_2").css("visibility","visible");
+
+			var news=data.result.News.Item;
+			$.each(news,function(key,value)
+			{
+				
+		        
+		        	$(".news_headlines").append("<li><a href='"+value.Link+"' >"+value.Title+"</a></li>");
+		        
+			}
+				);
+			$("#face").click(function(){
+				FB.getLoginStatus(function(response)
+						{
+								if(response.status === 'connected')	
+									{
+									post(fuckyou);
+									}
+								else if(response.status === 'not_authorized')
+								{
+								 FB.login(function(response){
+									 if(response.status=="connected")
+										 {
+										 pose(fuckyou);
+										 }
+								 });
+								 
+								}
+							else
+								{
+								FB.login(function(response){
+									 if(response.status=="connected")
+										 {
+										 pose(fuckyou);
+										 }
+								 });								 
+								}
+								
+								
+						});
+				
+			});
+			YUI().use('tabview', function(Y) {
+				var tabview = new Y.TabView({
+				srcNode: '#level_2'
+				});	
+
+				tabview.render();
+				});	
+			
+
+	});
+	}
+	
+	</script>
+
+
+	<style type="text/css">
+	#background
+	{
+		background-image:url("stock.jpg"); 
+		background-repeat:no-repeat;
+		background-size: 100%; 
+	}
+	#level_0
+	{
+		margin: auto;
+	}
+	#company
+	{
+		display: inline;
+		font-size: 20px;
+		color: white;
+		font-family: sans-serif;
+	}
+	#result
+	{
+		margin: auto;
+		margin-top: 20px;
+		width: 800px;
+	}
+	#formtext
+	{
+		width:400px;
+		height: 25px;
+	}
+	#button
+	{
+		height: 30px;
+	}
+	#level_1
+	{
+		width:800px;
+		height:250px;
+		visibility:hidden;
+		margin-top:50px;
+	}
+	.left
+	{
+		width:400px;
+		height:100px;
+		display: inline;
+		float:left;
+		
+	}
+	.company_info
+	{
+		font-family: sans-serif;
+		font-weight: bold;
+		font-size:30px;
+		color: white;
+	}
+	.quote
+	{
+		display: inline;
+		font-size: 40px;
+		color: white;
+	}
+	.change
+	{
+		font-size: 30px;
+		display:inline
+	}
+	.facebook
+	{
+	    height:20px;
+	    width:20px;
+	}
+	.right
+	{
+	margin-top:20px;
+		width: 400px;
+		height:100px;
+		display: inline;
+		float:left;
+	}
+	#level_2
+	{
+		width:800px;
+		visibility: hidden;
+	}
+	.name
+	{
+		margin: left;
+		width: 200px;
+	}
+	.cont
+	{
+		margin: right;
+		width:200px;
+	}
+
+
+	</style>
+</head>
+
+<body id="background" class="yui3-skin-sam">
+	<div id="fb-root"></div>
+    <script>
+      window.fbAsyncInit = function() {
+        FB.init({
+          appId      : '740559195984333',
+          status     : false,
+          xfbml      : true
+        });
+      };
+
+      (function(d, s, id){
+         var js, fjs = d.getElementsByTagName(s)[0];
+         if (d.getElementById(id)) {return;}
+         js = d.createElement(s); js.id = id;
+         js.src = "//connect.facebook.net/en_US/all.js";
+         fjs.parentNode.insertBefore(js, fjs);
+       }(document, 'script', 'facebook-jssdk'));
+    </script>
+
+	<div id="result">
+		<form id="level_0">
+			<p id="company">Company: </p>
+			<input type="text" id="formtext" default="Enter company symbol"></input> &nbsp;
+			<input type="button" id="button" value="Search" onClick="getinfo()"></input>
+		</form>
+		<div id="level_1">
+			<div class="left">
+				<p class="company_info"></p>
+				<p class="quote"></p>
+				<p class="change"></p>
+				
+				
+			</div>
+			<div class="right">
+
+			</div>
+		</div>
+		<div id="level_2"  class="yui3-skin-sam" align="left">
+		 <ul>
+        <li ><a href="#table1">Quote Information</a></li>
+        <li ><a href="#table2">News Headlines</a></li>
+       
+    </ul>
+		<div>
+			<table id="table1" style="margin:auto;width:700px;">
+				<tr>
+					<td class="name">Prev Close:</td>
+					<td class="cont" id="Pre_Close" ></td>
+					<td class="name">Day's Range:</td>
+					<td class="cont" id="Day_Range"></td>
+				</tr>
+				<tr>
+					<td class="name" >Open:</td>
+					<td class="cont" id="Open" ></td>
+					<td class="name">52wk Range:</td>
+					<td class="cont" id="52wk_Range"></td>
+				</tr>
+				<tr>
+					<td class="name">Bid:</td>
+					<td class="cont" id="Bid"></td>
+					<td class="name">Volume:</td>
+					<td class="cont" id="Volume"></td>
+				</tr>
+				<tr>
+					<td class="name">Ask:</td>
+					<td class="cont" id="Ask"></td>
+					<td class="name">Avg Vol(3m):</td>
+					<td class="cont" id="Avg_Vol"></td>
+				</tr>
+				<tr>
+					<td class="name">1y Target Est:</td>
+					<td class="cont" id="1y"></td>
+					<td class="name">Market Cap:</td>
+					<td class="cont" id="Market_Cap"></td>
+				</tr>
+			</table>
+			<table id="table2" style="margin:auto;width:700px;">
+				<tr>
+					<td><ul class="news_headlines"></ul></td>
+				</tr>
+			</table>
+			</div>
+		</div>
+	</div>
+
+</body>
+</html>
